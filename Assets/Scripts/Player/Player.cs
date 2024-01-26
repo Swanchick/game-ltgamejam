@@ -68,9 +68,9 @@ public class Player : MonoBehaviour
         playerController.Move(movement * Time.deltaTime);
     }
 
-    private void ChangeState(PlayerState playerState)
+    public void ChangeState(PlayerState playerState)
     {
-
+        playerGroundState = playerState;
     }
 
     private bool IsGrounded()
@@ -86,13 +86,25 @@ public class Player : MonoBehaviour
         {
             currentAcceleration = playerGroundAcceleration;
             gMovement = Vector3.zero;
+            ChangeState(PlayerState.Walk);
         } else
         {
             gMovement += downDirection * -gravity * Time.deltaTime * 0.1f;
             currentAcceleration = playerAirAcceleration;
+            ChangeState(PlayerState.Air);
         }
 
         movement += gMovement;
+    }
+
+    public void Jump()
+    {
+
+    }
+
+    public void Jump(Vector3 direction)
+    {
+
     }
 
     private void CameraRotation()
