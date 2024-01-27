@@ -27,7 +27,7 @@ public class TagBullet : MonoBehaviour
     private void Movement()
     {
         Vector3 movement = transform.forward * buleltSpeed;
-        gravityMovement += gravity * Time.deltaTime * 0.5f;
+        gravityMovement += gravity * Time.deltaTime * 2f;
 
         movement += gravityMovement * Vector3.up;
 

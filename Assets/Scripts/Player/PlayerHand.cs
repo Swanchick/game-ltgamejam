@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerHand : MonoBehaviour
 {
     [Header("Bobbing")]
-    [SerializeField] private Transform playerHead;
+    [SerializeField] private Transform playerCamera;
     [SerializeField] private Transform weaponStaff;
     [SerializeField] private Player player;
     [SerializeField] private float minBobbing = 0f;
@@ -26,10 +26,10 @@ public class PlayerHand : MonoBehaviour
 
     private void Start()
     {
-        Player.PlayerMove.AddListener(HandBobbing);
+        Player.PlayerMove.AddListener(HeadBobbing);
     }
 
-    private void HandBobbing(Player player, Vector3 velocity)
+    private void HeadBobbing(Player player, Vector3 velocity)
     {
         if (velocity.magnitude < minBobbing || !player.IsGrounded())
         {
@@ -39,13 +39,19 @@ public class PlayerHand : MonoBehaviour
             return;
         }
 
-        Vector3 wepPos = weaponStaff.localPosition;
-        wepPos.y = Mathf.Sin(currentTime) * distanceBobbing;
-        wepPos.x = Mathf.Cos(currentTime / 2) * distanceBobbing;
+        Vector3 camPos = playerCamera.localPosition;
+        camPos.y = Mathf.Sin(currentTime) * distanceBobbing;
 
-        weaponStaff.localPosition = Vector3.Lerp(weaponStaff.localPosition, wepPos, Time.deltaTime * player.GetCurrentSpeed() * 2f);
+        playerCamera.localPosition = Vector3.Lerp(playerCamera.localPosition, camPos, Time.deltaTime * player.GetCurrentSpeed() * 2f);
 
         currentTime += Time.deltaTime * bobbingSpeed;
+    }
+
+    private void ResetBobbing()
+    {
+        Vector3 pos = playerCamera.localPosition;
+
+        playerCamera.localPosition = Vector3.Lerp(pos, Vector3.zero, Time.deltaTime * bobbingSpeed);
     }
 
     private void Update()
@@ -82,7 +88,7 @@ public class PlayerHand : MonoBehaviour
     {
         if (!canShoot || tagBullets.Count == 0) return;
 
-        GameObject bullet = Instantiate(tagBullets[currentBullet], playerHead.position, playerHead.rotation);
+        GameObject bullet = Instantiate(tagBullets[currentBullet], playerCamera.position, playerCamera.rotation);
 
         canShoot = false;
         Invoke(nameof(EnableShooting), shootTime);
@@ -91,13 +97,6 @@ public class PlayerHand : MonoBehaviour
     private void EnableShooting()
     {
         canShoot = true;
-    }
-
-    private void ResetBobbing()
-    {
-        Vector3 pos = weaponStaff.localPosition;
-
-        weaponStaff.localPosition = Vector3.Lerp(pos, Vector3.zero, Time.deltaTime * bobbingSpeed);
     }
 
     public bool TagExist(string tagName)

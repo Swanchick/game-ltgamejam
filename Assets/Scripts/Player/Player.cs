@@ -202,7 +202,7 @@ public class Player : MonoBehaviour
 
     private void FindTag()
     {
-        Collider[] colliders = Physics.OverlapSphere(playerFoot.position, tagRadius, tagMask);
+        Collider[] colliders = Physics.OverlapCapsule(transform.position, playerHead.position, tagRadius, tagMask);
 
         Debug.DrawRay(playerFoot.position, downDirection * tagRadius);
 
