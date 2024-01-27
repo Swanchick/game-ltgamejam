@@ -12,4 +12,19 @@ public class Vector3Utils
 
         return vector;
     }
+
+    public static Vector3 Abs(Vector3 vector)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            vector[i] = Mathf.Abs(vector[i]);
+        }
+
+        return vector;
+    }
+
+    public static bool IsNormalWall(Vector3 normal)
+    {
+        return Mathf.Round(normal.y) == 0;
+    }
 }

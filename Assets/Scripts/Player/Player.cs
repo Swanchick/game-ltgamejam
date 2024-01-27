@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.Playables;
 
@@ -37,8 +38,9 @@ public class Player : MonoBehaviour
     private Vector3 referenceVelocity = Vector3.zero;
     private Vector3 downDirection = Vector3.down;
     private float gravity;
-    private Vector3 gMovement;
+    private Vector3 gMovement = Vector3.zero;
     private bool playerJumped = false;
+    private Vector3 horizontalVelocity = Vector3.zero;
 
     private float currentSpeed = 0f;
     private float currentAcceleration = 0f;
@@ -75,12 +77,18 @@ public class Player : MonoBehaviour
         direction *= currentSpeed;
 
         movement = Vector3.SmoothDamp(movement, direction, ref referenceVelocity, currentAcceleration);
-        Vector3 horizontalDirection = Vector3Utils.ReverseVector(-downDirection);
-        movement = Vector3.Scale(movement, horizontalDirection);
+        movement = Vector3.Scale(movement, GetHorizontal());
 
         Falling();
 
         playerController.Move(movement * Time.deltaTime);
+
+        horizontalVelocity = playerController.velocity;
+    }
+
+    private Vector3 GetHorizontal()
+    {
+        return Vector3Utils.ReverseVector(-downDirection);
     }
 
     public void ChangeState(PlayerState newPlayerState)
@@ -90,8 +98,6 @@ public class Player : MonoBehaviour
 
     private bool IsGrounded()
     {
-        Debug.DrawRay(playerFoot.position, downDirection * groundCheckDistance, Color.red);
-
         return Physics.Raycast(playerFoot.position, downDirection, groundCheckDistance, groundMask);
     }
 
@@ -117,30 +123,37 @@ public class Player : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                Jump();
+                Jump(playerJumpImpulse);
             }
         } 
         else
         {
-            gMovement += downDirection * -gravity * Time.deltaTime;
+            gMovement += downDirection * -gravity * Time.deltaTime * 0.7f;
         }
-
-        movement += gMovement;
+        
+        playerController.Move(gMovement * Time.deltaTime);
     }
 
-    public void Jump()
+    public void Jump(float jumpImpulse)
     {
-        Jump(-downDirection);
+        Jump(-downDirection, jumpImpulse);
     }
 
-    public void Jump(Vector3 direction)
+    public void Jump(Vector3 direction, float jumpImpulse)
     {
         if (playerJumped) return;
 
+        Vector3 horizontal = GetHorizontal();
+
         gMovement = Vector3.zero;
-        gMovement = direction * playerJumpImpulse;
+        gMovement = direction * jumpImpulse;
+
+        Vector3 hMovement = Vector3.Scale(gMovement, GetHorizontal());
+        gMovement = Vector3.Scale(gMovement, Vector3Utils.Abs(downDirection));
 
         playerJumped = true;
+
+        movement += hMovement * 2f;
 
         Invoke(nameof(ResetJump), playerJumpCooldown);
     }
@@ -148,6 +161,14 @@ public class Player : MonoBehaviour
     private void ResetJump()
     {
         playerJumped = false;
+    }
+
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if (IsGrounded()) return;
+
+        gMovement = Vector3.Scale(gMovement, Vector3Utils.Abs(downDirection));
+        
     }
 
     private void CameraRotation()
@@ -172,23 +193,21 @@ public class Player : MonoBehaviour
 
     private void FindTag()
     {
-        Collider[] colliders = Physics.OverlapSphere(transform.position, tagRadius, tagMask);
+        Collider[] colliders = Physics.OverlapSphere(playerFoot.position, tagRadius, tagMask);
+
+        Debug.DrawRay(playerFoot.position, downDirection * tagRadius);
 
         if (colliders.Length == 0)
         {
-            if (currentTag)
-            {
-                OnTagExit(currentTag);
-                currentTag = null;
-            }
-            
+            ClearTag();
             return;
         }
 
         Collider tagCollider = colliders[0];
         if (!tagCollider) return;
-
+        
         BaseTag tag = tagCollider.GetComponent<BaseTag>();
+
         string tagName = tag.GetTagName();
 
         if (currentTag)
@@ -205,6 +224,14 @@ public class Player : MonoBehaviour
             currentTag = tag;
             OnTagEnter(tag);
         }
+    }
+
+    private void ClearTag()
+    {
+        if (!currentTag) return;
+
+        OnTagExit(currentTag);
+        currentTag = null;
     }
 
     private void OnTagEnter(BaseTag newTag)

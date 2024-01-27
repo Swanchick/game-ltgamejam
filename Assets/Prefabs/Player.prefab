@@ -275,7 +275,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cameraSensetivity: 1.5
   playerHead: {fileID: 7445491534881864994}
-  playerSpeedGround: 6
+  playerSpeedWalk: 6
+  playerSpeedRun: 20
   playerSpeedAir: 5
   playerGroundAcceleration: 0.1
   playerAirAcceleration: 0.5
@@ -284,9 +285,9 @@ MonoBehaviour:
     m_Bits: 8
   playerFoot: {fileID: 5509061374157804144}
   groundCheckDistance: 0.25
-  playerJumpImpulse: 8
+  playerJumpImpulse: 5
   playerJumpCooldown: 0.1
-  tagRadius: 1
+  tagRadius: 0.25
   tagMask:
     serializedVersion: 2
     m_Bits: 64
