@@ -54,8 +54,6 @@ public class Player : MonoBehaviour
         CameraRotation();
         Movement();
         Falling();
-
-        Debug.Log(playerController.velocity.magnitude);
     }
 
     private void Movement()
@@ -107,7 +105,6 @@ public class Player : MonoBehaviour
             gMovement += downDirection * -gravity * Time.deltaTime;
             currentAcceleration = playerAirAcceleration;
             ChangeState(PlayerState.Air);
-            // currentSpeed = playerSpeedAir;
         }
 
         movement += gMovement;
