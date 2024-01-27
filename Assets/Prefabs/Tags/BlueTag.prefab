@@ -70,7 +70,7 @@ GameObject:
   m_Layer: 6
   m_Name: BlueTag
   m_TagString: Tag
-  m_Icon: {fileID: 5132851093641282708, guid: 0000000000000000d000000000000000, type: 0}
+  m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -125,3 +125,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tagName: SpeedTag
   decalProjection: {fileID: 8069083673474274398}
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0

@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerHand : MonoBehaviour
@@ -13,7 +15,9 @@ public class PlayerHand : MonoBehaviour
 
     [Header("Staff")]
     [SerializeField] private float shootTime = 0.2f;
-
+    [SerializeField] private GameObject[] tagBullets;
+    [SerializeField] private int currentBullet = 0;
+   
     private float currentTime = 0f;
     private bool canShoot = true;
 
@@ -59,7 +63,7 @@ public class PlayerHand : MonoBehaviour
     {
         if (!canShoot) return;
 
-        
+        GameObject bullet = Instantiate(tagBullets[currentBullet], playerHead.position, playerHead.rotation);
 
         canShoot = false;
         Invoke(nameof(EnableShooting), shootTime);
@@ -67,7 +71,7 @@ public class PlayerHand : MonoBehaviour
 
     private void EnableShooting()
     {
-
+        canShoot = true;
     }
 
     private void ResetBobbing()
