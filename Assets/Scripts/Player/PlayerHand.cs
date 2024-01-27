@@ -1,11 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerHand : MonoBehaviour
 {
-
     [Header("Bobbing")]
     [SerializeField] private Transform playerHead;
     [SerializeField] private Transform weaponStaff;
@@ -16,8 +14,11 @@ public class PlayerHand : MonoBehaviour
 
     [Header("Staff")]
     [SerializeField] private float shootTime = 0.2f;
-    [SerializeField] private GameObject[] tagBullets;
+    [SerializeField] private List<GameObject> tagBullets = new();
     [SerializeField] private int currentBullet = 0;
+
+    [Header("UI")]
+    [SerializeField] private RectTransform tagPanel;
    
     private float currentTime = 0f;
     private bool canShoot = true;
@@ -70,7 +71,7 @@ public class PlayerHand : MonoBehaviour
         char currentChar = inputString[0];
         if (!char.IsDigit(currentChar)) return currentBullet;
 
-        int inv = Mathf.Clamp(Convert.ToInt16(currentChar) - 48, 1, tagBullets.Length) - 1;
+        int inv = Mathf.Clamp(Convert.ToInt16(currentChar) - 48, 1, tagBullets.Count) - 1;
 
         Debug.Log(inv);
 
@@ -79,7 +80,7 @@ public class PlayerHand : MonoBehaviour
 
     private void Shoot()
     {
-        if (!canShoot) return;
+        if (!canShoot || tagBullets.Count == 0) return;
 
         GameObject bullet = Instantiate(tagBullets[currentBullet], playerHead.position, playerHead.rotation);
 
@@ -97,5 +98,26 @@ public class PlayerHand : MonoBehaviour
         Vector3 pos = weaponStaff.localPosition;
 
         weaponStaff.localPosition = Vector3.Lerp(pos, Vector3.zero, Time.deltaTime * bobbingSpeed);
+    }
+
+    public bool TagExist(string tagName)
+    {
+        foreach (GameObject tagObject in tagBullets)
+        {
+            if (tagObject.name == tagName)
+                return true;
+        }
+
+        return false;
+    }
+
+    public void AddTag(GameObject tagObject, GameObject tagImage)
+    {
+        if (TagExist(tagObject.name)) return;
+
+        tagBullets.Add(tagObject);
+        Instantiate(tagImage, tagPanel);
+
+        currentBullet = tagBullets.Count - 1;
     }
 }

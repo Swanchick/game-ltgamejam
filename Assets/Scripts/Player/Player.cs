@@ -17,18 +17,17 @@ public class Player : MonoBehaviour
     [Header("Player Movement")]
     [SerializeField] private float playerSpeedWalk = 6f;
     [SerializeField] private float playerSpeedRun = 10f;
-    [SerializeField] private float playerSpeedAir = 5f;
     [SerializeField] private float playerGroundAcceleration = 0.1f;
     [SerializeField] private float playerAirAcceleration = 0.5f;
     [SerializeField] private LayerMask groundMask;
     [SerializeField] private Transform playerFoot;
     [SerializeField] private float groundCheckDistance = 0.25f;
-    [SerializeField] private float playerJumpImpulse = 10f;
     [SerializeField] private float playerJumpCooldown = 0.2f;
 
     [Header("Tag")]
     [SerializeField] private float tagRadius = 1f;
     [SerializeField] private LayerMask tagMask;
+    [SerializeField] private PlayerHand playerHandScript;
 
     private CharacterController playerController;
 
@@ -173,10 +172,12 @@ public class Player : MonoBehaviour
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        if (IsGrounded()) return;
+        Vector3 normal = hit.normal;
+        if (!Vector3Utils.IsNormalWall(normal)) return;
 
-        gMovement = Vector3.Scale(gMovement, Vector3Utils.Abs(downDirection));
+        float speed = movement.magnitude;
         
+        movement = horizontalVelocity;
     }
 
     private void CameraRotation()
@@ -185,8 +186,6 @@ public class Player : MonoBehaviour
             Input.GetAxis("Mouse X"),
             Input.GetAxis("Mouse Y")
             );
-
-        
 
         mouseDelta = Vector2.Lerp(mouseDelta, Vector2.zero, Time.deltaTime);
         mouseDelta *= cameraSensetivity;
@@ -259,5 +258,13 @@ public class Player : MonoBehaviour
     private void OnTagExit(BaseTag oldTag)
     {
         oldTag.OnExit(this);
+    }
+
+    public void AddTag(GameObject tagObject, GameObject tagImage)
+    {
+        Debug.Log(tagObject);
+        Debug.Log(tagImage);
+
+        playerHandScript.AddTag(tagObject, tagImage);
     }
 }
