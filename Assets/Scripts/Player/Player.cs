@@ -1,11 +1,11 @@
 using UnityEngine;
+using UnityEngine.Playables;
 
 public enum PlayerState
 {
     Walk,
     Run,
-    Crouch,
-    Air
+    Crouch
 }
 
 public class Player : MonoBehaviour
@@ -15,7 +15,8 @@ public class Player : MonoBehaviour
     [SerializeField] private Transform playerHead;
 
     [Header("Player Movement")]
-    [SerializeField] private float playerSpeedGround = 10f;
+    [SerializeField] private float playerSpeedWalk = 6f;
+    [SerializeField] private float playerSpeedRun = 10f;
     [SerializeField] private float playerSpeedAir = 5f;
     [SerializeField] private float playerGroundAcceleration = 0.1f;
     [SerializeField] private float playerAirAcceleration = 0.5f;
@@ -24,6 +25,10 @@ public class Player : MonoBehaviour
     [SerializeField] private float groundCheckDistance = 0.25f;
     [SerializeField] private float playerJumpImpulse = 10f;
     [SerializeField] private float playerJumpCooldown = 0.2f;
+
+    [Header("Tag")]
+    [SerializeField] private float tagRadius = 1f;
+    [SerializeField] private LayerMask tagMask;
 
     private CharacterController playerController;
 
@@ -37,7 +42,9 @@ public class Player : MonoBehaviour
 
     private float currentSpeed = 0f;
     private float currentAcceleration = 0f;
-    private PlayerState playerGroundState = PlayerState.Walk;
+    private PlayerState playerState = PlayerState.Walk;
+
+    private BaseTag currentTag;
 
     private void Start()
     {
@@ -54,6 +61,8 @@ public class Player : MonoBehaviour
         CameraRotation();
         Movement();
         Falling();
+        FindTag();
+        OnTagStay();
     }
 
     private void Movement()
@@ -74,9 +83,9 @@ public class Player : MonoBehaviour
         playerController.Move(movement * Time.deltaTime);
     }
 
-    public void ChangeState(PlayerState playerState)
+    public void ChangeState(PlayerState newPlayerState)
     {
-        playerGroundState = playerState;
+        playerState = newPlayerState;
     }
 
     private bool IsGrounded()
@@ -88,12 +97,23 @@ public class Player : MonoBehaviour
 
     private void Falling()
     {
+        currentAcceleration = playerAirAcceleration;
+
         if (IsGrounded() && !playerJumped)
         {
-            currentAcceleration = playerGroundAcceleration;
-            currentSpeed = playerSpeedGround;
+            
+            switch (playerState)
+            {
+                case PlayerState.Walk:
+                    currentAcceleration = playerGroundAcceleration;
+                    currentSpeed = playerSpeedWalk;
+                    break;
+                case PlayerState.Run:
+                    currentSpeed = playerSpeedRun;
+                    break;
+            }
+            
             gMovement = Vector3.zero;
-            ChangeState(PlayerState.Walk);
 
             if (Input.GetKeyDown(KeyCode.Space))
             {
@@ -103,8 +123,6 @@ public class Player : MonoBehaviour
         else
         {
             gMovement += downDirection * -gravity * Time.deltaTime;
-            currentAcceleration = playerAirAcceleration;
-            ChangeState(PlayerState.Air);
         }
 
         movement += gMovement;
@@ -150,5 +168,59 @@ public class Player : MonoBehaviour
 
         playerHead.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
         transform.rotation = Quaternion.Euler(0f, finalRotation, 0f);
+    }
+
+    private void FindTag()
+    {
+        Collider[] colliders = Physics.OverlapSphere(transform.position, tagRadius, tagMask);
+
+        if (colliders.Length == 0)
+        {
+            if (currentTag)
+            {
+                OnTagExit(currentTag);
+                currentTag = null;
+            }
+            
+            return;
+        }
+
+        Collider tagCollider = colliders[0];
+        if (!tagCollider) return;
+
+        BaseTag tag = tagCollider.GetComponent<BaseTag>();
+        string tagName = tag.GetTagName();
+
+        if (currentTag)
+        {
+            if (currentTag.GetTagName() != tagName)
+            {
+                OnTagExit(currentTag);
+                OnTagEnter(tag);
+                currentTag = tag;
+            }
+        }
+        else
+        {
+            currentTag = tag;
+            OnTagEnter(tag);
+        }
+    }
+
+    private void OnTagEnter(BaseTag newTag)
+    {
+        newTag.OnEnter(this);
+    }
+
+    private void OnTagStay()
+    {
+        if (!currentTag) return;
+        
+        currentTag.OnStay(this);
+    }
+
+    private void OnTagExit(BaseTag oldTag)
+    {
+        oldTag.OnExit(this);
     }
 }
