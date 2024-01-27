@@ -132,15 +132,11 @@ public class Player : MonoBehaviour
             }
             
             gMovement = Vector3.zero;
-
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                Jump(playerJumpImpulse);
-            }
         } 
         else
         {
             gMovement += downDirection * -gravity * Time.deltaTime * 2f;
+            currentSpeed = playerSpeedWalk;
         }
         
         playerController.Move(gMovement * Time.deltaTime);

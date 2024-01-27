@@ -72,7 +72,11 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
-  jumpImpulse: 15
+  tagLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  distance: 0.1
+  jumpImpulse: 13
 --- !u!1 &6773794673553769716
 GameObject:
   m_ObjectHideFlags: 0

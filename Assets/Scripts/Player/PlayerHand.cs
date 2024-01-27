@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -57,6 +58,23 @@ public class PlayerHand : MonoBehaviour
         {
             Shoot();
         }
+
+        currentBullet = GetInventory();
+    }
+
+    private int GetInventory()
+    {
+        string inputString = Input.inputString;
+        if (inputString.Length == 0) return currentBullet;
+
+        char currentChar = inputString[0];
+        if (!char.IsDigit(currentChar)) return currentBullet;
+
+        int inv = Mathf.Clamp(Convert.ToInt16(currentChar) - 48, 1, tagBullets.Length) - 1;
+
+        Debug.Log(inv);
+
+        return inv;
     }
 
     private void Shoot()
