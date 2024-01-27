@@ -6,11 +6,6 @@ public class JumpTag : BaseTag
 
     private Vector3 jumpDirection = Vector3.zero;
 
-    private void Update()
-    {
-        Debug.DrawRay(decalProjection.position, -transform.up);
-    }
-
     public override void OnEnter(Player player)
     {
 

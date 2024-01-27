@@ -1,6 +1,5 @@
-using System.Security.Cryptography;
 using UnityEngine;
-using UnityEngine.Playables;
+using UnityEngine.Events;
 
 public enum PlayerState
 {
@@ -48,6 +47,9 @@ public class Player : MonoBehaviour
 
     private BaseTag currentTag;
 
+    public static UnityEvent<Player, Vector3> PlayerMove = new UnityEvent<Player, Vector3>();
+    public static UnityEvent<Player, Vector2> PlayerMouseRotate = new UnityEvent<Player, Vector2>();
+
     private void Start()
     {
         playerController = GetComponent<CharacterController>();
@@ -79,11 +81,11 @@ public class Player : MonoBehaviour
         movement = Vector3.SmoothDamp(movement, direction, ref referenceVelocity, currentAcceleration);
         movement = Vector3.Scale(movement, GetHorizontal());
 
-        Falling();
-
         playerController.Move(movement * Time.deltaTime);
 
         horizontalVelocity = playerController.velocity;
+
+        PlayerMove.Invoke(this, horizontalVelocity);
     }
 
     private Vector3 GetHorizontal()
@@ -96,7 +98,17 @@ public class Player : MonoBehaviour
         playerState = newPlayerState;
     }
 
-    private bool IsGrounded()
+    public float GetCurrentSpeed()
+    {
+        return currentSpeed;
+    }
+
+    public Vector3 GetHorizontalVelocity()
+    {
+        return horizontalVelocity;
+    }
+
+    public bool IsGrounded()
     {
         return Physics.Raycast(playerFoot.position, downDirection, groundCheckDistance, groundMask);
     }
@@ -128,7 +140,7 @@ public class Player : MonoBehaviour
         } 
         else
         {
-            gMovement += downDirection * -gravity * Time.deltaTime * 0.7f;
+            gMovement += downDirection * -gravity * Time.deltaTime * 2f;
         }
         
         playerController.Move(gMovement * Time.deltaTime);
@@ -177,6 +189,8 @@ public class Player : MonoBehaviour
             Input.GetAxis("Mouse X"),
             Input.GetAxis("Mouse Y")
             );
+
+        
 
         mouseDelta = Vector2.Lerp(mouseDelta, Vector2.zero, Time.deltaTime);
         mouseDelta *= cameraSensetivity;
