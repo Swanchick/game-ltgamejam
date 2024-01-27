@@ -15,12 +15,15 @@ public class Player : MonoBehaviour
     [SerializeField] private Transform playerHead;
 
     [Header("Player Movement")]
-    [SerializeField] private float playerSpeed = 10f;
+    [SerializeField] private float playerSpeedGround = 10f;
+    [SerializeField] private float playerSpeedAir = 5f;
     [SerializeField] private float playerGroundAcceleration = 0.1f;
     [SerializeField] private float playerAirAcceleration = 0.5f;
     [SerializeField] private LayerMask groundMask;
     [SerializeField] private Transform playerFoot;
     [SerializeField] private float groundCheckDistance = 0.25f;
+    [SerializeField] private float playerJumpImpulse = 10f;
+    [SerializeField] private float playerJumpCooldown = 0.2f;
 
     private CharacterController playerController;
 
@@ -30,7 +33,9 @@ public class Player : MonoBehaviour
     private Vector3 downDirection = Vector3.down;
     private float gravity;
     private Vector3 gMovement;
+    private bool playerJumped = false;
 
+    private float currentSpeed = 0f;
     private float currentAcceleration = 0f;
     private PlayerState playerGroundState = PlayerState.Walk;
 
@@ -46,10 +51,11 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        currentAcceleration = playerGroundAcceleration;
-
         CameraRotation();
         Movement();
+        Falling();
+
+        Debug.Log(playerController.velocity.magnitude);
     }
 
     private void Movement()
@@ -59,9 +65,11 @@ public class Player : MonoBehaviour
 
         Vector3 direction = transform.forward * vertical + transform.right * horizontal;
         direction.Normalize();
-        direction *= playerSpeed;
+        direction *= currentSpeed;
 
         movement = Vector3.SmoothDamp(movement, direction, ref referenceVelocity, currentAcceleration);
+        Vector3 horizontalDirection = Vector3Utils.ReverseVector(-downDirection);
+        movement = Vector3.Scale(movement, horizontalDirection);
 
         Falling();
 
@@ -82,16 +90,24 @@ public class Player : MonoBehaviour
 
     private void Falling()
     {
-        if (IsGrounded())
+        if (IsGrounded() && !playerJumped)
         {
             currentAcceleration = playerGroundAcceleration;
+            currentSpeed = playerSpeedGround;
             gMovement = Vector3.zero;
             ChangeState(PlayerState.Walk);
-        } else
+
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                Jump();
+            }
+        } 
+        else
         {
-            gMovement += downDirection * -gravity * Time.deltaTime * 0.1f;
+            gMovement += downDirection * -gravity * Time.deltaTime;
             currentAcceleration = playerAirAcceleration;
             ChangeState(PlayerState.Air);
+            // currentSpeed = playerSpeedAir;
         }
 
         movement += gMovement;
@@ -99,12 +115,24 @@ public class Player : MonoBehaviour
 
     public void Jump()
     {
-
+        Jump(-downDirection);
     }
 
     public void Jump(Vector3 direction)
     {
+        if (playerJumped) return;
 
+        gMovement = Vector3.zero;
+        gMovement = direction * playerJumpImpulse;
+
+        playerJumped = true;
+
+        Invoke(nameof(ResetJump), playerJumpCooldown);
+    }
+
+    private void ResetJump()
+    {
+        playerJumped = false;
     }
 
     private void CameraRotation()
