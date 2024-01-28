@@ -1,14 +1,11 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerHand : MonoBehaviour
 {
-
     [Header("Bobbing")]
-    [SerializeField] private Transform playerHead;
-    [SerializeField] private Transform weaponStaff;
+    [SerializeField] private Transform playerCamera;
     [SerializeField] private Player player;
     [SerializeField] private float minBobbing = 0f;
     [SerializeField] private float distanceBobbing = 0.5f;
@@ -16,19 +13,29 @@ public class PlayerHand : MonoBehaviour
 
     [Header("Staff")]
     [SerializeField] private float shootTime = 0.2f;
-    [SerializeField] private GameObject[] tagBullets;
+    [SerializeField] private List<GameObject> tagBullets = new();
     [SerializeField] private int currentBullet = 0;
-   
+
+    [Header("UI")]
+    [SerializeField] private RectTransform tagPanel;
+
+    [Header("Sound")]
+    private float soundCooldown = 0.5f;
+
     private float currentTime = 0f;
     private bool canShoot = true;
 
+    private AudioSource audioSource;
+    private bool canPlay = true;
 
     private void Start()
     {
-        Player.PlayerMove.AddListener(HandBobbing);
+        audioSource = GetComponent<AudioSource>();
+
+        Player.PlayerMove.AddListener(HeadBobbing);
     }
 
-    private void HandBobbing(Player player, Vector3 velocity)
+    private void HeadBobbing(Player player, Vector3 velocity)
     {
         if (velocity.magnitude < minBobbing || !player.IsGrounded())
         {
@@ -38,18 +45,25 @@ public class PlayerHand : MonoBehaviour
             return;
         }
 
-        Vector3 wepPos = weaponStaff.localPosition;
-        wepPos.y = Mathf.Sin(currentTime) * distanceBobbing;
-        wepPos.x = Mathf.Cos(currentTime / 2) * distanceBobbing;
+        Vector3 camPos = playerCamera.localPosition;
+        camPos.y = Mathf.Sin(currentTime) * distanceBobbing;
 
-        weaponStaff.localPosition = Vector3.Lerp(weaponStaff.localPosition, wepPos, Time.deltaTime * player.GetCurrentSpeed() * 2f);
+        playerCamera.localPosition = Vector3.Lerp(playerCamera.localPosition, camPos, Time.deltaTime * player.GetCurrentSpeed() * 2f);
 
         currentTime += Time.deltaTime * bobbingSpeed;
+    }
+
+    private void ResetBobbing()
+    {
+        Vector3 pos = playerCamera.localPosition;
+
+        playerCamera.localPosition = Vector3.Lerp(pos, Vector3.zero, Time.deltaTime * bobbingSpeed);
     }
 
     private void Update()
     {
         Controlls();
+        EmitSound();
     }
 
     private void Controlls()
@@ -59,29 +73,40 @@ public class PlayerHand : MonoBehaviour
             Shoot();
         }
 
-        currentBullet = GetInventory();
+        GetInventory();
     }
 
-    private int GetInventory()
+    private void GetInventory()
     {
-        string inputString = Input.inputString;
-        if (inputString.Length == 0) return currentBullet;
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            currentBullet = 0;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            currentBullet = 1;
+        }
+    }
 
-        char currentChar = inputString[0];
-        if (!char.IsDigit(currentChar)) return currentBullet;
+    private void EmitSound()
+    {
+        if (tagBullets.Count == 0) return;
 
-        int inv = Mathf.Clamp(Convert.ToInt16(currentChar) - 48, 1, tagBullets.Length) - 1;
-
-        Debug.Log(inv);
-
-        return inv;
+        if (Input.GetMouseButtonDown(0))
+        {
+            audioSource.Play();
+        } 
+        else if (Input.GetMouseButtonUp(0))
+        {
+            audioSource.Stop();
+        }
     }
 
     private void Shoot()
     {
-        if (!canShoot) return;
+        if (!canShoot || tagBullets.Count == 0) return;
 
-        GameObject bullet = Instantiate(tagBullets[currentBullet], playerHead.position, playerHead.rotation);
+        GameObject bullet = Instantiate(tagBullets[currentBullet], playerCamera.position, playerCamera.rotation);
 
         canShoot = false;
         Invoke(nameof(EnableShooting), shootTime);
@@ -92,10 +117,24 @@ public class PlayerHand : MonoBehaviour
         canShoot = true;
     }
 
-    private void ResetBobbing()
+    public bool TagExist(string tagName)
     {
-        Vector3 pos = weaponStaff.localPosition;
+        foreach (GameObject tagObject in tagBullets)
+        {
+            if (tagObject.name == tagName)
+                return true;
+        }
 
-        weaponStaff.localPosition = Vector3.Lerp(pos, Vector3.zero, Time.deltaTime * bobbingSpeed);
+        return false;
+    }
+
+    public void AddTag(GameObject tagObject, GameObject tagImage)
+    {
+        if (TagExist(tagObject.name)) return;
+
+        tagBullets.Add(tagObject);
+        Instantiate(tagImage, tagPanel);
+
+        currentBullet = tagBullets.Count - 1;
     }
 }

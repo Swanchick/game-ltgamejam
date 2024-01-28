@@ -17,18 +17,21 @@ public class Player : MonoBehaviour
     [Header("Player Movement")]
     [SerializeField] private float playerSpeedWalk = 6f;
     [SerializeField] private float playerSpeedRun = 10f;
-    [SerializeField] private float playerSpeedAir = 5f;
     [SerializeField] private float playerGroundAcceleration = 0.1f;
+    [SerializeField] private float playerRunAcceleration = 0.3f;
     [SerializeField] private float playerAirAcceleration = 0.5f;
     [SerializeField] private LayerMask groundMask;
     [SerializeField] private Transform playerFoot;
     [SerializeField] private float groundCheckDistance = 0.25f;
-    [SerializeField] private float playerJumpImpulse = 10f;
     [SerializeField] private float playerJumpCooldown = 0.2f;
 
     [Header("Tag")]
     [SerializeField] private float tagRadius = 1f;
     [SerializeField] private LayerMask tagMask;
+    [SerializeField] private PlayerHand playerHandScript;
+    [SerializeField] public Transform RespawnPoint;
+
+    public static Player Instance;
 
     private CharacterController playerController;
 
@@ -50,6 +53,10 @@ public class Player : MonoBehaviour
     public static UnityEvent<Player, Vector3> PlayerMove = new UnityEvent<Player, Vector3>();
     public static UnityEvent<Player, Vector2> PlayerMouseRotate = new UnityEvent<Player, Vector2>();
 
+    private void Awake()
+    {
+        Instance = this;
+    }
     private void Start()
     {
         playerController = GetComponent<CharacterController>();
@@ -58,6 +65,8 @@ public class Player : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        transform.position = RespawnPoint.position;
     }
 
     private void Update()
@@ -115,8 +124,6 @@ public class Player : MonoBehaviour
 
     private void Falling()
     {
-        currentAcceleration = playerAirAcceleration;
-
         if (IsGrounded() && !playerJumped)
         {
             
@@ -127,6 +134,7 @@ public class Player : MonoBehaviour
                     currentSpeed = playerSpeedWalk;
                     break;
                 case PlayerState.Run:
+                    currentAcceleration = playerRunAcceleration;
                     currentSpeed = playerSpeedRun;
                     break;
             }
@@ -135,6 +143,8 @@ public class Player : MonoBehaviour
         } 
         else
         {
+            currentAcceleration = playerAirAcceleration;
+            
             gMovement += downDirection * -gravity * Time.deltaTime * 2f;
             currentSpeed = playerSpeedWalk;
         }
@@ -173,10 +183,15 @@ public class Player : MonoBehaviour
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        if (IsGrounded()) return;
-
-        gMovement = Vector3.Scale(gMovement, Vector3Utils.Abs(downDirection));
-        
+        Vector3 normal = hit.normal;
+        if (Vector3Utils.IsNormalWall(normal))
+        {
+            movement = horizontalVelocity;
+        } else
+        {
+            normal = Vector3.down;
+            gMovement = Vector3.down * -gravity;
+        }
     }
 
     private void CameraRotation()
@@ -185,8 +200,6 @@ public class Player : MonoBehaviour
             Input.GetAxis("Mouse X"),
             Input.GetAxis("Mouse Y")
             );
-
-        
 
         mouseDelta = Vector2.Lerp(mouseDelta, Vector2.zero, Time.deltaTime);
         mouseDelta *= cameraSensetivity;
@@ -203,7 +216,7 @@ public class Player : MonoBehaviour
 
     private void FindTag()
     {
-        Collider[] colliders = Physics.OverlapSphere(playerFoot.position, tagRadius, tagMask);
+        Collider[] colliders = Physics.OverlapCapsule(transform.position, playerHead.position, tagRadius, tagMask);
 
         Debug.DrawRay(playerFoot.position, downDirection * tagRadius);
 
@@ -259,5 +272,22 @@ public class Player : MonoBehaviour
     private void OnTagExit(BaseTag oldTag)
     {
         oldTag.OnExit(this);
+    }
+
+    public void AddTag(GameObject tagObject, GameObject tagImage)
+    {
+        playerHandScript.AddTag(tagObject, tagImage);
+    }
+
+    public void SetCheckoutPoint(Transform NewRespawnPoint)
+    {
+        RespawnPoint = NewRespawnPoint;
+    }
+
+    public void Death()
+    {
+        playerController.enabled = false;
+        transform.position = RespawnPoint.position;
+        playerController.enabled = true;
     }
 }

@@ -119,7 +119,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61d4e535fbe86654db4d090d7074a33c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  buleltSpeed: 50
+  buleltSpeed: 100
   tagObject: {fileID: 6914053373678037837, guid: 881356640d818bc4b9c6c5cc01c5fe22, type: 3}
 --- !u!143 &2169693592541307658
 CharacterController:
