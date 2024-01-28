@@ -19,13 +19,20 @@ public class PlayerHand : MonoBehaviour
 
     [Header("UI")]
     [SerializeField] private RectTransform tagPanel;
-   
+
+    [Header("Sound")]
+    private float soundCooldown = 0.5f;
+
     private float currentTime = 0f;
     private bool canShoot = true;
 
+    private AudioSource audioSource;
+    private bool canPlay = true;
 
     private void Start()
     {
+        audioSource = GetComponent<AudioSource>();
+
         Player.PlayerMove.AddListener(HeadBobbing);
     }
 
@@ -57,6 +64,7 @@ public class PlayerHand : MonoBehaviour
     private void Update()
     {
         Controlls();
+        EmitSound();
     }
 
     private void Controlls()
@@ -82,6 +90,20 @@ public class PlayerHand : MonoBehaviour
         Debug.Log(inv);
 
         return inv;
+    }
+
+    private void EmitSound()
+    {
+        if (tagBullets.Count == 0) return;
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            audioSource.Play();
+        } 
+        else if (Input.GetMouseButtonUp(0))
+        {
+            audioSource.Stop();
+        }
     }
 
     private void Shoot()

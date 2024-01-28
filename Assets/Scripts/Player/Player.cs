@@ -173,11 +173,14 @@ public class Player : MonoBehaviour
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
         Vector3 normal = hit.normal;
-        if (!Vector3Utils.IsNormalWall(normal)) return;
-
-        float speed = movement.magnitude;
-        
-        movement = horizontalVelocity;
+        if (Vector3Utils.IsNormalWall(normal))
+        {
+            movement = horizontalVelocity;
+        } else
+        {
+            normal = Vector3.down;
+            gMovement = Vector3.down * -gravity;
+        }
     }
 
     private void CameraRotation()
@@ -262,9 +265,6 @@ public class Player : MonoBehaviour
 
     public void AddTag(GameObject tagObject, GameObject tagImage)
     {
-        Debug.Log(tagObject);
-        Debug.Log(tagImage);
-
         playerHandScript.AddTag(tagObject, tagImage);
     }
 }
