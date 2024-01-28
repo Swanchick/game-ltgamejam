@@ -284,7 +284,7 @@ public class Player : MonoBehaviour
         RespawnPoint = NewRespawnPoint;
     }
 
-    public void Death()
+    public void Teleport()
     {
         playerController.enabled = false;
         transform.position = RespawnPoint.position;

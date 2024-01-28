@@ -8,7 +8,7 @@ public class Lava : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            Player.Instance.Death();
+            Player.Instance.Teleport();
         }
     }
 }
