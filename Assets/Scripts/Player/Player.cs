@@ -18,6 +18,7 @@ public class Player : MonoBehaviour
     [SerializeField] private float playerSpeedWalk = 6f;
     [SerializeField] private float playerSpeedRun = 10f;
     [SerializeField] private float playerGroundAcceleration = 0.1f;
+    [SerializeField] private float playerRunAcceleration = 0.3f;
     [SerializeField] private float playerAirAcceleration = 0.5f;
     [SerializeField] private LayerMask groundMask;
     [SerializeField] private Transform playerFoot;
@@ -114,8 +115,6 @@ public class Player : MonoBehaviour
 
     private void Falling()
     {
-        currentAcceleration = playerAirAcceleration;
-
         if (IsGrounded() && !playerJumped)
         {
             
@@ -126,6 +125,7 @@ public class Player : MonoBehaviour
                     currentSpeed = playerSpeedWalk;
                     break;
                 case PlayerState.Run:
+                    currentAcceleration = playerRunAcceleration;
                     currentSpeed = playerSpeedRun;
                     break;
             }
@@ -134,6 +134,8 @@ public class Player : MonoBehaviour
         } 
         else
         {
+            currentAcceleration = playerAirAcceleration;
+            
             gMovement += downDirection * -gravity * Time.deltaTime * 2f;
             currentSpeed = playerSpeedWalk;
         }

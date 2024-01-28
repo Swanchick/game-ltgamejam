@@ -1,4 +1,3 @@
-
 using UnityEngine;
 
 public abstract class BaseTag : MonoBehaviour
@@ -8,9 +7,15 @@ public abstract class BaseTag : MonoBehaviour
     [SerializeField] protected LayerMask groundLayer;
     [SerializeField] protected LayerMask tagLayer;
     [SerializeField] protected float distance = 0.5f;
+    
+    protected AudioSource tagSource;
 
     private void Start()
     {
+        tagSource = GetComponent<AudioSource>();
+        if (tagSource)
+            tagSource.Play();
+
         decalProjection.localRotation = Quaternion.Euler(90f, Random.Range(0, 360), 0);
 
         Collider[] colliders = Physics.OverlapSphere(transform.position, distance, tagLayer);

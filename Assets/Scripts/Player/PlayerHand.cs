@@ -6,7 +6,6 @@ public class PlayerHand : MonoBehaviour
 {
     [Header("Bobbing")]
     [SerializeField] private Transform playerCamera;
-    [SerializeField] private Transform weaponStaff;
     [SerializeField] private Player player;
     [SerializeField] private float minBobbing = 0f;
     [SerializeField] private float distanceBobbing = 0.5f;
@@ -74,22 +73,19 @@ public class PlayerHand : MonoBehaviour
             Shoot();
         }
 
-        currentBullet = GetInventory();
+        GetInventory();
     }
 
-    private int GetInventory()
+    private void GetInventory()
     {
-        string inputString = Input.inputString;
-        if (inputString.Length == 0) return currentBullet;
-
-        char currentChar = inputString[0];
-        if (!char.IsDigit(currentChar)) return currentBullet;
-
-        int inv = Mathf.Clamp(Convert.ToInt16(currentChar) - 48, 1, tagBullets.Count) - 1;
-
-        Debug.Log(inv);
-
-        return inv;
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            currentBullet = 0;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            currentBullet = 1;
+        }
     }
 
     private void EmitSound()
