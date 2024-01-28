@@ -29,6 +29,9 @@ public class Player : MonoBehaviour
     [SerializeField] private float tagRadius = 1f;
     [SerializeField] private LayerMask tagMask;
     [SerializeField] private PlayerHand playerHandScript;
+    [SerializeField] public Transform RespawnPoint;
+
+    public static Player Instance;
 
     private CharacterController playerController;
 
@@ -50,6 +53,10 @@ public class Player : MonoBehaviour
     public static UnityEvent<Player, Vector3> PlayerMove = new UnityEvent<Player, Vector3>();
     public static UnityEvent<Player, Vector2> PlayerMouseRotate = new UnityEvent<Player, Vector2>();
 
+    private void Awake()
+    {
+        Instance = this;
+    }
     private void Start()
     {
         playerController = GetComponent<CharacterController>();
@@ -58,6 +65,8 @@ public class Player : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        transform.position = RespawnPoint.position;
     }
 
     private void Update()
@@ -268,5 +277,17 @@ public class Player : MonoBehaviour
     public void AddTag(GameObject tagObject, GameObject tagImage)
     {
         playerHandScript.AddTag(tagObject, tagImage);
+    }
+
+    public void SetCheckoutPoint(Transform NewRespawnPoint)
+    {
+        RespawnPoint = NewRespawnPoint;
+    }
+
+    public void Death()
+    {
+        playerController.enabled = false;
+        transform.position = RespawnPoint.position;
+        playerController.enabled = true;
     }
 }
