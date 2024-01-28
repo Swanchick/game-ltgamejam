@@ -52,7 +52,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: cca7b54de24219b40b98ca47cb7636a2, type: 3}
   - {fileID: 8300000, guid: 54d903f42f13559458a4d38cbffdd756, type: 3}
   minStep: 3
-  stepCooldown: 2
+  stepCooldown: 4.5
 --- !u!82 &7666774231963046380
 AudioSource:
   m_ObjectHideFlags: 0
@@ -415,7 +415,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerCamera: {fileID: 24541046372217974}
-  weaponStaff: {fileID: 265813018321856127}
   player: {fileID: 140954314327180249}
   minBobbing: 3
   distanceBobbing: 0.1
@@ -996,6 +995,7 @@ MonoBehaviour:
   playerSpeedWalk: 8
   playerSpeedRun: 20
   playerGroundAcceleration: 0.1
+  playerRunAcceleration: 0.3
   playerAirAcceleration: 0.8
   groundMask:
     serializedVersion: 2
@@ -1008,3 +1008,4 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   playerHandScript: {fileID: 2279644333588839509}
+  RespawnPoint: {fileID: 0}

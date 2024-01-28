@@ -190,7 +190,7 @@ public class Player : MonoBehaviour
         } else
         {
             normal = Vector3.down;
-            gMovement = Vector3.down * -gravity;
+            gMovement = Vector3.down * -gravity * Time.deltaTime * 5f;
         }
     }
 

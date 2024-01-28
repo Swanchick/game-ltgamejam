@@ -4,13 +4,21 @@ using UnityEngine;
 
 public class Checkpoint : MonoBehaviour
 {
-    public BoxCollider trigger;
+    private BoxCollider trigger;
+    private bool canSave = true;
+
+    private void Start()
+    {
+        trigger = GetComponent<BoxCollider>();
+    }
+
     public void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (other.tag == "Player" && canSave)
         {
             Player.Instance.SetCheckoutPoint(transform);
-            trigger.enabled = false;
-        };
+            
+            canSave = false;
+        }
     }
 }
