@@ -13,6 +13,13 @@ public class VolumeSettings : MonoBehaviour
     [SerializeField] private Slider musicSlider;
     [SerializeField] private Slider SFXSlider;
 
+    public static VolumeSettings Instance;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     private void Start()
     {
         if(settings)
@@ -39,6 +46,8 @@ public class VolumeSettings : MonoBehaviour
 
     public void LoadVolume()
     {
+        print(settings.MusicVolume);
+        print(settings.SFXVolume);
         musicSlider.value = settings.MusicVolume;
         SFXSlider.value = settings.SFXVolume;
         SetMusicVolume();

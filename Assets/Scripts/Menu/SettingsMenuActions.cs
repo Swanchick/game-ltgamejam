@@ -11,6 +11,13 @@ public class SettingsMenuActions : MonoBehaviour
     public Toggle highQuality;
     public Toggle lowQuality;
 
+    public static SettingsMenuActions Instance;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     private void Start()
     {
         LoadGraphicsQuality();
@@ -57,6 +64,7 @@ public class SettingsMenuActions : MonoBehaviour
 
     public void LoadGraphicsQuality()
     {
+        print(settings.GraphicsQuality);
         if (settings.GraphicsQuality == SettingsData.GraphicsQualityEnum.High)
         {
             HighQualityChanged();

@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: SettingsDataInstance
   m_EditorClassIdentifier: 
   GraphicsQuality: 0
-  MusicVolume: 0
-  SFXVolume: 0
+  MusicVolume: 0.7
+  SFXVolume: 0.5
+  FOVValue: 60

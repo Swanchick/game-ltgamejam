@@ -6,12 +6,8 @@ using UnityEngine.SceneManagement;
 public class MainMenuActions : MonoBehaviour
 {
     // Use this for initialization
-    private SettingsData settings;
     void Start()
     {
-        if(settings)
-        {
-        }
     }
 
     // Update is called once per frame
